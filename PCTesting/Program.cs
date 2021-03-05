@@ -122,6 +122,8 @@ namespace PCTesting
                     installer.Start();
                     installer.WaitForExit();
                     Console.WriteLine("Application installed successfully!");
+                    path = (Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86).ToString() + "\\Geeks3D\\Benchmarks\\FurMark\\FurMark.exe");
+                    //set path to newly installed furmark
                 }
                 catch
                 {
