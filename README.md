@@ -14,3 +14,4 @@ Arguments:
 `-c --cpu`: Begin CPU Stress Test  
 `-g --gpu`: Begin Furmark GPU Stress Test  
 `-b --both`: Begin Combined GPU/CPU Stress Test  
+`-t --time`: Specify time (in seconds) to run the selected test
