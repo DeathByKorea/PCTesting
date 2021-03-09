@@ -15,6 +15,8 @@ namespace PCTesting
         public bool gpu { get; set; }
         [Option('b', "both", Required = false, HelpText = "Start Combined test.")]
         public bool both { get; set; }
+        [Option('t', "time", Required = false, HelpText= "Set time (in Seconds) to run the specified tests. Combines with any other option.")]
+        public int time { get; set; }   
     }
 
     class Program
@@ -22,27 +24,28 @@ namespace PCTesting
         static void Main(string[] args)
         {
             //Set version and print copywrite
-            string version = "0.2.0";
+            string version = "0.2.1";
             Console.WriteLine("PC Testing Script v" + version + ". Made by Lew :) 2021");
 
             //detect commandline args, shamelessly copy-pasted from the docs.
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(o =>
                 {
+                    int time = o.time * 1000;
                     if (o.cpu)
                     {
                         Console.WriteLine("Starting CPU Only Test.");
-                        stressCPU(true);
+                        stressCPU(true, time);
                     }
                     else if (o.gpu)
                     {
                         Console.WriteLine("Starting GPU Only Test.");
-                        stressGPU(true);
+                        stressGPU(true, time);
                     }
                     else if (o.both)
                     {
                         Console.WriteLine("Starting Combined Test.");
-                        startBoth(true);
+                        startBoth(true, time);
                     }
 
                 });
@@ -62,15 +65,15 @@ namespace PCTesting
                 {
                 case "1":
                     Console.WriteLine("Starting CPU Stress Test");
-                        stressCPU(false);
+                        stressCPU(false,0);
                 break;
                 case "2":
                     Console.WriteLine("Starting Furmark GPU Test");
-                        stressGPU(false);
+                        stressGPU(false,10000);
                 break;
                 case "3":
                     Console.WriteLine("Starting combined CPU/GPU Test");
-                        startBoth(false);
+                        startBoth(false,0);
                 break;
 
                 default:
@@ -80,7 +83,7 @@ namespace PCTesting
                  }
             }
         }
-        public static void stressCPU(bool arg)
+        public static void stressCPU(bool arg, int time)
         {
             //Check for cpu stress test, download if not, then run with -console option.
             Console.Clear();
@@ -99,12 +102,20 @@ namespace PCTesting
             process.StartInfo.Arguments = "-console";
             process.StartInfo.FileName = "cpustress.exe";
             process.Start();
+            //if no time passed, skip. otherwise, wait for the timeout then kill the process. thanks Jon!
+            if (time != 0)
+            {
+                if (!process.WaitForExit(time))
+                {
+                    process.Kill(); // this will probably take longer than the specified time. it hogs all of your cpu time so this takes a few seconds longer. shouldn't really be an issue for longer times hopefully.
+                }
+            }
             process.WaitForExit();
             //If program invoked with cli arguments, exit after completition, otherwise, show menu.
             if (arg) System.Environment.Exit(0);
         }
 
-        public static void stressGPU(bool arg)
+        public static void stressGPU(bool arg, int time)
         {
             //find if FurMark exists in either Program files or in testing tools directory
             string path = null;
@@ -150,23 +161,31 @@ namespace PCTesting
             process.StartInfo.Arguments = "/nogui /width 1280 /height 720 /run_mode 2 /app_process_priority 50";
             process.StartInfo.FileName = path;
             process.Start();
-
+            Console.WriteLine(time);
             //set to high priority so it doesn't totally fall over when cpu bench is running
             Process[] processes = Process.GetProcessesByName("FurMark");
             foreach (Process task in processes)
             {
                 task.PriorityClass = ProcessPriorityClass.High;
             }
+            if (time != 0)
+            {
+                if (!process.WaitForExit(time))
+                {
+                    process.Kill();
+                }
+            }
+
             process.WaitForExit();
             if (arg) System.Environment.Exit(0);
 
         }
 
-        public static void startBoth(bool arg)
+        public static void startBoth(bool arg, int time)
         {
             //start both, does what it says on the tin
-            Thread CPU = new Thread(() => stressCPU(arg));
-            Thread GPU = new Thread(() => stressGPU(arg));
+            Thread CPU = new Thread(() => stressCPU(arg, time));
+            Thread GPU = new Thread(() => stressGPU(arg, time));
             GPU.Start();
             // starting the cpu test too soon causes the gpu test to take way longer to load
             Thread.Sleep(5000);
