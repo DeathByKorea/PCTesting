@@ -69,7 +69,7 @@ namespace PCTesting
                 break;
                 case "2":
                     Console.WriteLine("Starting Furmark GPU Test");
-                        stressGPU(false,10000);
+                        stressGPU(false,0);
                 break;
                 case "3":
                     Console.WriteLine("Starting combined CPU/GPU Test");
