@@ -4,6 +4,8 @@ using System.Threading;
 using System.Net;
 using System.Diagnostics;
 using CommandLine;
+using System.Windows.Automation;
+
 namespace PCTesting
 {
     public class Options
@@ -16,7 +18,9 @@ namespace PCTesting
         [Option('b', "both", Required = false, HelpText = "Start Combined test.")]
         public bool both { get; set; }
         [Option('t', "time", Required = false, HelpText= "Set time (in Seconds) to run the specified tests. Combines with any other option.")]
-        public int time { get; set; }   
+        public int time { get; set; }  
+        [Option('a', "awd", Required = false, HelpText = "Sets time to 3600s (1hr), then runs the combined test. Used in-house for PC testing")]
+        public bool awd { get; set; }
     }
 
     class Program
@@ -39,6 +43,7 @@ namespace PCTesting
                     }
                     else if (o.gpu)
                     {
+                        Console.WriteLine(time);
                         Console.WriteLine("Starting GPU Only Test.");
                         stressGPU(true, time);
                     }
@@ -47,6 +52,37 @@ namespace PCTesting
                         Console.WriteLine("Starting Combined Test.");
                         startBoth(true, time);
                     }
+                    else if (o.awd)
+                    {
+                        Console.WriteLine("Would you like to test the PC?");
+                        string input = Console.ReadLine();
+                        input = input.ToLower();
+                      
+                            if (input == "y")
+                            {
+
+                            }
+                            else if (input == "n")
+                            {
+                                Console.WriteLine("Exiting.");
+                                Thread.Sleep(1000);
+                                Environment.Exit(0);
+                            }
+                            else { 
+                            Console.WriteLine("Invalid Input. Try Again");
+                            Thread.Sleep(1000);
+                            Console.Clear();
+                            Main(args);
+                        }
+
+
+                        }
+
+                        Console.WriteLine("Starting 1-Hour Combined Test.");
+                        Console.WriteLine("Opening Task Manager");
+                        taskmgr();
+                        startBoth(true, 3600 * 1000);
+                    
 
                 });
 
@@ -63,24 +99,24 @@ namespace PCTesting
                 again = false;
                 switch (Console.ReadLine())
                 {
-                case "1":
-                    Console.WriteLine("Starting CPU Stress Test");
-                        stressCPU(false,0);
-                break;
-                case "2":
-                    Console.WriteLine("Starting Furmark GPU Test");
-                        stressGPU(false,0);
-                break;
-                case "3":
-                    Console.WriteLine("Starting combined CPU/GPU Test");
-                        startBoth(false,0);
-                break;
+                    case "1":
+                        Console.WriteLine("Starting CPU Stress Test");
+                        stressCPU(false, 0);
+                        break;
+                    case "2":
+                        Console.WriteLine("Starting Furmark GPU Test");
+                        stressGPU(false, 0);
+                        break;
+                    case "3":
+                        Console.WriteLine("Starting combined CPU/GPU Test");
+                        startBoth(false, 0);
+                        break;
 
-                default:
-                    Console.WriteLine("Incorrect option, try again :)");
-                again = true;
-                break;
-                 }
+                    default:
+                        Console.WriteLine("Incorrect option, try again :)");
+                        again = true;
+                        break;
+                }
             }
         }
         public static void stressCPU(bool arg, int time)
@@ -96,6 +132,7 @@ namespace PCTesting
             {
                 Console.WriteLine("File already exists, continuing!");
             }
+
             //Start CPU Stress test, pass args to PressureService to run in console mode. Press q to quit!
             Process process = new Process();
             process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
@@ -144,7 +181,7 @@ namespace PCTesting
             else
             {
                 // find which one exists, set path. probs cleaner way of doing this
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86).ToString() + "\\Geeks3D\\Benchmarks\\FurMark\\FurMark.exe")){
+                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86).ToString() + "\\Geeks3D\\Benchmarks\\FurMark\\FurMark.exe")) {
                     path = (Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86).ToString() + "\\Geeks3D\\Benchmarks\\FurMark\\FurMark.exe");
                 }
                 else if (File.Exists("C:\\AWD Testing Tools\\FurMark\\FurMark.exe"))
@@ -198,14 +235,34 @@ namespace PCTesting
         {
             //download file from my website. boo hoo hardcoded variables
             WebClient downloader = new WebClient();
-            string uri = "https://d-bk.uk/files/", file;
+            string uri = "https://lew.ooo/files/", file;
             file = uri + name;
             Console.WriteLine("Downloading " + file);
             downloader.DownloadFile(file, name);
             Console.WriteLine("Downloaded " + file + " from " + uri);
 
-            
+
         }
+        public static void taskmgr()
+        {
+            // Kill existing instances
+            foreach (Process pOld in Process.GetProcessesByName("taskmgr"))
+            {
+                pOld.Kill();
+            }
+
+            // Create a new instance
+            Process p = new Process();
+            p.StartInfo.FileName = "taskmgr";
+            p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.UseShellExecute = true;
+            p.StartInfo.Verb = "runas";
+            p.Start();
+
+        }
+    
+
     }
+    
 }
 
