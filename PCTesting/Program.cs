@@ -54,29 +54,29 @@ namespace PCTesting
                     }
                     else if (o.awd)
                     {
-                        Console.WriteLine("Would you like to test the PC? (y/n)");
-                        string input = Console.ReadLine();
-                        input = input.ToLower();
+                      //  Console.WriteLine("Would you like to test the PC? (y/n)");
+                       //  string input = Console.ReadLine();
+                      //  input = input.ToLower();
                       
-                            if (input == "y")
-                            {
+                     //       if (input == "y")
+                    //        {
                             Console.WriteLine("Starting 1-Hour Combined Test.");
                             Console.WriteLine("Opening Task Manager");
                             taskmgr();
                             startBoth(true, 3600 * 1000);
-                        }
-                            else if (input == "n")
-                            {
-                                Console.WriteLine("Exiting.");
-                                Thread.Sleep(1000);
-                                Environment.Exit(0);
-                            }
-                            else { 
-                            Console.WriteLine("Invalid Input. Try Again");
-                            Thread.Sleep(1000);
-                            Console.Clear();
-                            Main(args);
-                        }
+                    //    }
+                   //         else if (input == "n")
+                   //         {
+                   //             Console.WriteLine("Exiting.");
+                  //              Thread.Sleep(1000);
+                   //             Environment.Exit(0);
+                   //         }
+                  //          else { 
+                   //         Console.WriteLine("Invalid Input. Try Again");
+                   //         Thread.Sleep(1000);
+                   //         Console.Clear();
+                   //         Main(args);
+                   //     }
 
 
                         }
