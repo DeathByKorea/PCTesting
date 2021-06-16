@@ -54,14 +54,17 @@ namespace PCTesting
                     }
                     else if (o.awd)
                     {
-                        Console.WriteLine("Would you like to test the PC?");
+                        Console.WriteLine("Would you like to test the PC? (y/n)");
                         string input = Console.ReadLine();
                         input = input.ToLower();
                       
                             if (input == "y")
                             {
-
-                            }
+                            Console.WriteLine("Starting 1-Hour Combined Test.");
+                            Console.WriteLine("Opening Task Manager");
+                            taskmgr();
+                            startBoth(true, 3600 * 1000);
+                        }
                             else if (input == "n")
                             {
                                 Console.WriteLine("Exiting.");
@@ -78,10 +81,7 @@ namespace PCTesting
 
                         }
 
-                        Console.WriteLine("Starting 1-Hour Combined Test.");
-                        Console.WriteLine("Opening Task Manager");
-                        taskmgr();
-                        startBoth(true, 3600 * 1000);
+
                     
 
                 });
